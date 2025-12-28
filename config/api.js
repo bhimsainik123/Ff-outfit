@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const API_ENDPOINTS = [
-    'https://deepinfosukh.vercel.app/info',
+    'https://info.sukhdaku.qzz.io/info',
 ];
 
 const axiosInstance = axios.create({
@@ -22,4 +22,5 @@ module.exports = {
     API_ENDPOINTS,
     axiosInstance
 };
+
 
