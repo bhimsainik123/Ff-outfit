@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const API_ENDPOINTS = [
-    'https://free-fire-info-five.vercel.app/info',
+    'http://raw.sukhdaku.qzz.io/player/info',
 ];
 
 const axiosInstance = axios.create({
@@ -22,6 +22,7 @@ module.exports = {
     API_ENDPOINTS,
     axiosInstance
 };
+
 
 
 
