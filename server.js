@@ -146,3 +146,6 @@ if (cluster.isMaster && NODE_ENV === "production") {
 }
 
 module.exports = app;
+
+// Shortcut: /api/profile?uid=xxx  (same as /api/v1/profile?uid=xxx&bg=1)
+app.use("/api", require("./routes/profile"));
