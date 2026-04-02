@@ -53,7 +53,7 @@ class ProfileService {
         const clothes  = profileData.profileInfo?.clothes
                       || profileData.profileInfo?.equippedItems || [];
         const weapons  = profileData.basicInfo?.weaponSkinShows || [];
-        const petId    = profileData.petInfo?.skinId || profileData.petInfo?.id;
+        const petId    = profileData.petInfo?.id;
         const avatarId = this.getAvatarId(profileData);
 
         const imageRequests = [];
