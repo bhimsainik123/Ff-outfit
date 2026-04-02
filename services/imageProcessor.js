@@ -5,37 +5,34 @@ const { ULTRA_CONCURRENCY } = require('../config/constants');
 class ImageProcessor {
 
     static async fetchBuffer(url) {
-        const res = await axiosInstance.get(url, { responseType: 'arraybuffer', timeout: 6000 });
-        if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
-        return Buffer.from(res.data);
+        try {
+            const res = await axiosInstance.get(url, {
+                responseType: 'arraybuffer',
+                timeout: 10000,
+                maxRedirects: 5,
+                validateStatus: s => s === 200
+            });
+            return Buffer.from(res.data);
+        } catch (e) {
+            throw new Error(e.response?.status || e.message);
+        }
     }
 
-    // Try each URL in order, return first success
     static async processImage(req) {
         const { urls, width, height } = req;
-        let buffer = null;
 
         for (const url of urls) {
             try {
-                buffer = await this.fetchBuffer(url);
-                if (buffer) break;
+                const buffer = await this.fetchBuffer(url);
+                const img = await Jimp.read(buffer);
+                if (width && height) img.scaleToFit(width, height);
+                console.log(`✅ ${url.split('/').pop()}`);
+                return await img.getBufferAsync(Jimp.MIME_PNG);
             } catch (e) {
-                console.log(`⚡ Skip: ${url.split('/').pop()}`);
+                console.log(`⚡ Skip: ${url.split('/').pop()} (${e.message})`);
             }
         }
-
-        if (!buffer) return null;
-
-        try {
-            const img = await Jimp.read(buffer);
-            if (width && height) {
-                img.contain(width, height,
-                    Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
-            }
-            return await img.getBufferAsync(Jimp.MIME_PNG);
-        } catch (e) {
-            return null;
-        }
+        return null;
     }
 
     static async processAllImages(requests) {
