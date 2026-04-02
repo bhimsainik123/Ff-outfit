@@ -14,18 +14,29 @@ class ImageProcessor {
         return Buffer.from(res.data);
     }
 
-    // APNG fix: remove acTL and fcTL chunks, keep only IHDR+IDAT+IEND
+    // Remove white/near-white background
+    static removeWhiteBg(img, threshold = 240) {
+        img.scan(0, 0, img.bitmap.width, img.bitmap.height, function(x, y, idx) {
+            const r = this.bitmap.data[idx];
+            const g = this.bitmap.data[idx + 1];
+            const b = this.bitmap.data[idx + 2];
+            if (r > threshold && g > threshold && b > threshold) {
+                this.bitmap.data[idx + 3] = 0; // transparent
+            }
+        });
+        return img;
+    }
+
+    // Strip APNG animation chunks so Jimp can read it
     static fixApng(buffer) {
         const PNG_SIG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
         if (!buffer.slice(0, 8).equals(PNG_SIG)) return buffer;
-
         const chunks = [];
         let i = 8;
-        while (i < buffer.length) {
+        while (i < buffer.length - 4) {
             const len = buffer.readUInt32BE(i);
             const type = buffer.slice(i + 4, i + 8).toString('ascii');
             const chunkTotal = 12 + len;
-            // Skip APNG-specific chunks
             if (!['acTL', 'fcTL', 'fdAT'].includes(type)) {
                 chunks.push(buffer.slice(i, i + chunkTotal));
             }
@@ -40,11 +51,13 @@ class ImageProcessor {
         for (const url of urls) {
             try {
                 let buffer = await this.fetchBuffer(url);
-                
-                // Fix APNG before Jimp reads it
                 buffer = this.fixApng(buffer);
 
                 const img = await Jimp.read(buffer);
+
+                // Remove white background from weapon/pet images
+                this.removeWhiteBg(img);
+
                 if (width && height) img.scaleToFit(width, height);
                 console.log(`✅ ${url.split('/').pop()}`);
                 return await img.getBufferAsync(Jimp.MIME_PNG);
