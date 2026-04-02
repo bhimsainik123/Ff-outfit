@@ -5,16 +5,30 @@ const CHARACTER_BASES = [
     'https://raw.githubusercontent.com/bhimsainik123/free-fire-chracter/main',
     'https://raw.githubusercontent.com/sukhdaku/free-fire-chracter/main',
 ];
+
 const ICONS_BASE = 'https://raw.githubusercontent.com/I-SHOW-AKIRU200/AKIRU-ICONS/main/ICONS';
+
+const ITEMS_FOLDERS = [
+    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items',
+    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items1',
+    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items2',
+    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items3',
+    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items4',
+];
 
 class ProfileService {
 
+    // AKIRU first, then all Auto-update-Items folders
     static _iconUrls(id) {
         if (!id) return [];
         const clean = String(id).replace(/\.(png|jpg|jpeg|webp)$/i, '');
-        return [`${ICONS_BASE}/${clean}.png`];
+        return [
+            `${ICONS_BASE}/${clean}.png`,
+            ...ITEMS_FOLDERS.map(base => `${base}/${clean}.png`),
+        ];
     }
 
+    // bhimsainik123 first, then sukhdaku fallback
     static _characterUrls(avatarId) {
         if (!avatarId) return [];
         const clean = String(avatarId).replace(/\.(png|jpg|jpeg|webp)$/i, '');
