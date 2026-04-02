@@ -5,47 +5,35 @@ const { ULTRA_CONCURRENCY } = require('../config/constants');
 class ImageProcessor {
 
     static async fetchBuffer(url) {
-        const response = await axiosInstance.get(url, {
-            responseType: 'arraybuffer',
-            timeout: 6000
-        });
-        if (response.status !== 200) throw new Error(`HTTP ${response.status}`);
-        return Buffer.from(response.data);
+        const res = await axiosInstance.get(url, { responseType: 'arraybuffer', timeout: 6000 });
+        if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
+        return Buffer.from(res.data);
     }
 
+    // Try each URL in order, return first success
     static async processImage(req) {
-        const { url, fallbackUrl, width, height } = req;
+        const { urls, width, height } = req;
         let buffer = null;
 
-        // Try primary URL
-        try {
-            buffer = await this.fetchBuffer(url);
-        } catch (e) {
-            console.log(`⚡ Primary fail: ${url.split('/').pop()} — trying fallback`);
-            // Try fallback URL
-            if (fallbackUrl) {
-                try {
-                    buffer = await this.fetchBuffer(fallbackUrl);
-                } catch (e2) {
-                    console.log(`⚡ Fallback fail: ${fallbackUrl.split('/').pop()}`);
-                    return null;
-                }
-            } else {
-                return null;
+        for (const url of urls) {
+            try {
+                buffer = await this.fetchBuffer(url);
+                if (buffer) break;
+            } catch (e) {
+                console.log(`⚡ Skip: ${url.split('/').pop()}`);
             }
         }
 
         if (!buffer) return null;
 
         try {
-            const image = await Jimp.read(buffer);
+            const img = await Jimp.read(buffer);
             if (width && height) {
-                image.contain(width, height,
+                img.contain(width, height,
                     Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
             }
-            return await image.getBufferAsync(Jimp.MIME_PNG);
+            return await img.getBufferAsync(Jimp.MIME_PNG);
         } catch (e) {
-            console.log(`⚡ Jimp error: ${e.message}`);
             return null;
         }
     }
@@ -65,7 +53,7 @@ class ImageProcessor {
     static async generateFinalImage(backgroundBuffer, overlays) {
         const base = await Jimp.read(backgroundBuffer);
         for (const overlay of overlays) {
-            if (!overlay || !overlay.input) continue;
+            if (!overlay?.input) continue;
             try {
                 const img = await Jimp.read(overlay.input);
                 base.composite(img, overlay.left, overlay.top);
