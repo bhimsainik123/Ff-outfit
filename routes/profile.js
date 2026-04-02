@@ -126,3 +126,6 @@ router.get('/profile', async (req, res) => {
 });
 
 module.exports = router;
+// ── thug4ff style endpoint: /api/profile?uid=123 ──────────────────────
+// Already handled by /api/v1/profile?uid=123&bg=1
+// This alias makes it work as /api/v1/profile?uid=123 (bg defaults to 1)
