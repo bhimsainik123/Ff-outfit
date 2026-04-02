@@ -5,17 +5,33 @@ const { ULTRA_CONCURRENCY } = require('../config/constants');
 class ImageProcessor {
 
     static async fetchBuffer(url) {
-        try {
-            const res = await axiosInstance.get(url, {
-                responseType: 'arraybuffer',
-                timeout: 10000,
-                maxRedirects: 5,
-                validateStatus: s => s === 200
-            });
-            return Buffer.from(res.data);
-        } catch (e) {
-            throw new Error(e.response?.status || e.message);
+        const res = await axiosInstance.get(url, {
+            responseType: 'arraybuffer',
+            timeout: 10000,
+            maxRedirects: 5,
+            validateStatus: s => s === 200
+        });
+        return Buffer.from(res.data);
+    }
+
+    // APNG fix: remove acTL and fcTL chunks, keep only IHDR+IDAT+IEND
+    static fixApng(buffer) {
+        const PNG_SIG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+        if (!buffer.slice(0, 8).equals(PNG_SIG)) return buffer;
+
+        const chunks = [];
+        let i = 8;
+        while (i < buffer.length) {
+            const len = buffer.readUInt32BE(i);
+            const type = buffer.slice(i + 4, i + 8).toString('ascii');
+            const chunkTotal = 12 + len;
+            // Skip APNG-specific chunks
+            if (!['acTL', 'fcTL', 'fdAT'].includes(type)) {
+                chunks.push(buffer.slice(i, i + chunkTotal));
+            }
+            i += chunkTotal;
         }
+        return Buffer.concat([PNG_SIG, ...chunks]);
     }
 
     static async processImage(req) {
@@ -23,7 +39,11 @@ class ImageProcessor {
 
         for (const url of urls) {
             try {
-                const buffer = await this.fetchBuffer(url);
+                let buffer = await this.fetchBuffer(url);
+                
+                // Fix APNG before Jimp reads it
+                buffer = this.fixApng(buffer);
+
                 const img = await Jimp.read(buffer);
                 if (width && height) img.scaleToFit(width, height);
                 console.log(`✅ ${url.split('/').pop()}`);
