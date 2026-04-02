@@ -1,6 +1,8 @@
 const { API_ENDPOINTS } = require('../config/api');
 const { ultraFastFetch } = require('../utils/fetcher');
 
+const CHARACTER_BASE = 'https://raw.githubusercontent.com/bhimsainik123/free-fire-chracter/main';
+
 const ITEMS_FOLDERS = [
     'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items',
     'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items1',
@@ -11,11 +13,20 @@ const ITEMS_FOLDERS = [
 
 class ProfileService {
 
-    // Returns array of URLs to try (all folders)
-    static _allUrls(id) {
+    static _itemUrls(id) {
         if (!id) return [];
         const clean = String(id).replace(/\.(png|jpg|jpeg|webp)$/i, '');
         return ITEMS_FOLDERS.map(base => `${base}/${clean}.png`);
+    }
+
+    static _characterUrls(avatarId) {
+        if (!avatarId) return [];
+        const clean = String(avatarId).replace(/\.(png|jpg|jpeg|webp)$/i, '');
+        return [
+            `${CHARACTER_BASE}/${clean}.png`,
+            // fallback: items folders
+            ...ITEMS_FOLDERS.map(base => `${base}/${clean}.png`)
+        ];
     }
 
     static async fetchProfileData(uid) {
@@ -27,7 +38,7 @@ class ProfileService {
 
     static getAvatarId(profileData) {
         if (profileData?.profileInfo?.avatarId) return profileData.profileInfo.avatarId;
-        return 101000016;
+        return 101000011;
     }
 
     static buildImageRequests(profileData, bgConfig) {
@@ -51,42 +62,26 @@ class ProfileService {
             const idStr = String(id);
             const key   = idStr.startsWith('211') ? `211_${cnt211++}` : idStr.substring(0, 3);
             if (pos[key] && sizes[key]) {
-                imageRequests.push({
-                    urls: this._allUrls(id),
-                    width: sizes[key][0],
-                    height: sizes[key][1]
-                });
+                imageRequests.push({ urls: this._itemUrls(id), width: sizes[key][0], height: sizes[key][1] });
                 overlayData.push(pos[key]);
             }
         }
 
         // ── 2. WEAPON ─────────────────────────────────────────────────
         if (weapons[0] && pos.weapon && sizes.weapon) {
-            imageRequests.push({
-                urls: this._allUrls(weapons[0]),
-                width: sizes.weapon[0],
-                height: sizes.weapon[1]
-            });
+            imageRequests.push({ urls: this._itemUrls(weapons[0]), width: sizes.weapon[0], height: sizes.weapon[1] });
             overlayData.push(pos.weapon);
         }
 
         // ── 3. PET ────────────────────────────────────────────────────
         if (petId && pos.pet && sizes.pet) {
-            imageRequests.push({
-                urls: this._allUrls(petId),
-                width: sizes.pet[0],
-                height: sizes.pet[1]
-            });
+            imageRequests.push({ urls: this._itemUrls(petId), width: sizes.pet[0], height: sizes.pet[1] });
             overlayData.push(pos.pet);
         }
 
-        // ── 4. CHARACTER (last - on top) ──────────────────────────────
+        // ── 4. CHARACTER (last - renders on top) ──────────────────────
         if (avatarId && pos.avatar && sizes.avatar) {
-            imageRequests.push({
-                urls: this._allUrls(avatarId),
-                width: sizes.avatar[0],
-                height: sizes.avatar[1]
-            });
+            imageRequests.push({ urls: this._characterUrls(avatarId), width: sizes.avatar[0], height: sizes.avatar[1] });
             overlayData.push(pos.avatar);
         }
 
