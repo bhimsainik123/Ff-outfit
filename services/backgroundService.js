@@ -10,11 +10,11 @@ class BackgroundService {
     initialize() {
         try {
             const backgroundsDir = path.join(__dirname, '../assets/backgrounds');
-            
+
             Object.keys(BACKGROUND_CONFIGS).forEach(bgId => {
                 const config = BACKGROUND_CONFIGS[bgId];
                 const bgPath = path.join(backgroundsDir, config.filename);
-                
+
                 if (fs.existsSync(bgPath)) {
                     this.cachedBackgrounds.set(bgId, fs.readFileSync(bgPath));
                     console.log(`✅ Background ${bgId} (${config.name}) cached successfully`);
