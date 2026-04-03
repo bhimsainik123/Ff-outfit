@@ -1,68 +1,92 @@
-const COMMON_LAYOUT = {
-    positions: {
-        "211_1": [65,  85],    // hair
-        "214":   [65, 315],    // top wear
-        "203":   [65, 540],    // face
-
-        "211_2": [990, 85],    // mask
-        "204":   [1230, 85],   // bottom
-        "pet":   [990, 315],   // pet
-        "205":   [1230, 315],  // shoes
-
-        "weapon":[920, 545],   // weapon box
-
-        // 🔥 BIG CHARACTER (FIXED)
-        "avatar":[350, 10]
-    },
-
-    sizes: {
-        "211_1": [175, 200],
-        "214":   [175, 200],
-        "203":   [175, 200],
-
-        "211_2": [175, 175],
-        "204":   [175, 175],
-        "pet":   [175, 175],
-        "205":   [175, 175],
-
-        "weapon":[380, 170],
-
-        // 🔥 PERFECT SIZE (NO CUT + BIG LOOK)
-        "avatar":[500, 780]
-    }
-};
-
 const BACKGROUND_CONFIGS = {
     1: {
-        name: 'Classic Purple',
+        name: 'Classic Blue',
         filename: 'bg1.png',
-        ...COMMON_LAYOUT
+        positions: {
+            "203": [55, 355],
+            "204": [55, 600],
+            "205": [180, 770],
+            "214": [855, 380],
+            "211_1": [730, 190],
+            "211_2": [145, 150],
+            "avatar": [310, 200],
+            "weapon": [680, 600],
+            "pet": [725, 777]
+        },
+        sizes: {
+            "203": [130, 130],
+            "204": [130, 130],
+            "205": [130, 130],
+            "214": [130, 130],
+            "211_1": [170, 130],
+            "211_2": [170, 130],
+            "avatar": [388, 660],
+            "weapon": [300, 120],
+            "pet": [100, 100]
+        }
     },
-
     2: {
-        name: 'Neon Blue (Perfect)',
+        name: 'Neon Purple',
         filename: 'bg2.png',
-        ...COMMON_LAYOUT
+        positions: {
+            "211_1": [190, 250],
+            "211_2": [190, 750],
+            "214": [190, 1250],
+            "203": [2250, 240],
+            "204": [2780, 240],
+            "205": [2780, 760],
+            "avatar": [400, 200],
+            "weapon": [2250, 1180],
+            "pet": [2250, 760]
+        },
+        sizes: {
+            "203": [280, 280],
+            "204": [280, 280],
+            "205": [280, 280],
+            "214": [280, 280],
+            "211_1": [240, 240],
+            "211_2": [240, 240],
+            "avatar": [1100, 1400],
+            "weapon": [640, 440],
+            "pet": [240, 240]
+        }
     },
-
     3: {
-        name: 'Neon Orange',
+        name: 'Neon Red',
         filename: 'bg3.png',
-        ...COMMON_LAYOUT
+        positions: {
+            "203": [55, 355],
+            "204": [55, 600],
+            "205": [180, 770],
+            "214": [855, 380],
+            "211_1": [730, 190],
+            "211_2": [145, 150],
+            "avatar": [310, 200],
+            "weapon": [680, 600],
+            "pet": [725, 777]
+        },
+        sizes: {
+            "203": [130, 130],
+            "204": [130, 130],
+            "205": [130, 130],
+            "214": [130, 130],
+            "211_1": [170, 130],
+            "211_2": [170, 130],
+            "avatar": [388, 660],
+            "weapon": [300, 120],
+            "pet": [100, 100]
+        }
     }
 };
 
 module.exports = {
     BACKGROUND_CONFIGS,
-
     getBackgroundConfig: (bgId) => {
         const id = parseInt(bgId) || 1;
         return BACKGROUND_CONFIGS[id] || BACKGROUND_CONFIGS[1];
     },
-
-    getAllBackgrounds: () =>
-        Object.keys(BACKGROUND_CONFIGS).map(id => ({
-            id: parseInt(id),
-            name: BACKGROUND_CONFIGS[id].name
-        }))
+    getAllBackgrounds: () => Object.keys(BACKGROUND_CONFIGS).map(id => ({
+        id: parseInt(id),
+        name: BACKGROUND_CONFIGS[id].name
+    }))
 };
