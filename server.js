@@ -94,8 +94,9 @@ app.get("/", (req, res) => {
 });
 
 // 📌 API ROUTES
-app.use("/api/v1", profileRoutes);
-
+app.use("/profile", profileRoutes);
+app.use("/api", profileRoutes);
+app.use("/api/v1", profileRoutes);   // Purana bhi rakhna hai to
 // ❗ ERROR HANDLER
 app.use((err, req, res, next) => {
     console.error("Error:", err.message);
