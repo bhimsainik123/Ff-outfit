@@ -80,12 +80,12 @@ app.get("/", (req, res) => {
         </p>
 
         <div class="example-box">
-            /api/v1/profile?uid=<b>[UID]</b>&bg=<b>[0|1]</b>
+            https://profile.bhimsainik.qzz.io/profile?uid=<b>[UID]</b>&bg=<b>[0|1]</b>
         </div>
 
         <p class="example">
             Example:  
-            <b>/api/v1/profile?uid=123456&bg=1</b>
+            <b>https://profile.bhimsainik.qzz.io/profile?uid=123456&bg=1</b>
         </p>
     </div>
 </body>
@@ -94,7 +94,7 @@ app.get("/", (req, res) => {
 });
 
 // 📌 API ROUTES
-app.use("/api/v1", profileRoutes);
+app.use("/profile", profileRoutes);
 
 // ❗ ERROR HANDLER
 app.use((err, req, res, next) => {
@@ -141,7 +141,7 @@ if (cluster.isMaster && NODE_ENV === "production") {
 } else {
     app.listen(PORT, () => {
         console.log(`⚡ Server running on port ${PORT}`);
-        console.log(`🎯 Example: http://localhost:${PORT}/api/v1/profile?uid=123&bg=1`);
+        console.log(`🎯 Example: http://localhost:${PORT}/profile?uid=123&bg=1`);
     });
 }
 
