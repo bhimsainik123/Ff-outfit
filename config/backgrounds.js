@@ -2,79 +2,90 @@ const BACKGROUND_CONFIGS = {
     1: {
         name: 'Classic Blue',
         filename: 'bg1.png',
+        // 1024x1024 - hexagon layout (purple)
+        // Left col hexagons: top(~80,80), mid(~60,340), lower(~60,560), bottom(~100,760)
+        // Right col hexagons: top(~720,130), mid(~760,370)
+        // Weapon rectangle: (~620,580) weapon box
+        // Pet hexagon: (~700,760)
         positions: {
-            "203": [55, 355],
-            "204": [55, 600],
-            "205": [180, 770],
-            "214": [855, 380],
-            "211_1": [730, 190],
-            "211_2": [145, 150],
-            "avatar": [310, 200],
-            "weapon": [680, 600],
-            "pet": [725, 777]
+            "211_1": [75,  60],   // top-left big hexagon - hair
+            "214":   [45, 330],   // left-mid hexagon - top wear
+            "204":   [45, 545],   // left-lower hexagon - bottom
+            "205":   [90, 755],   // bottom-left hexagon - shoes
+            "211_2": [715, 110],  // top-right hexagon - mask/face2
+            "203":   [755, 360],  // right-mid hexagon - face
+            "avatar":[195,  10],  // character center
+            "weapon":[615, 575],  // weapon rectangle box
+            "pet":   [695, 755]   // pet hexagon bottom-right
         },
         sizes: {
-            "203": [130, 130],
-            "204": [130, 130],
-            "205": [130, 130],
-            "214": [130, 130],
-            "211_1": [170, 130],
-            "211_2": [170, 130],
-            "avatar": [388, 660],
-            "weapon": [300, 120],
-            "pet": [100, 100]
+            "211_1": [195, 195],
+            "214":   [175, 175],
+            "204":   [175, 175],
+            "205":   [175, 175],
+            "211_2": [175, 175],
+            "203":   [175, 175],
+            "avatar":[590, 980],
+            "weapon":[260, 150],
+            "pet":   [175, 175]
         }
     },
     2: {
-        name: 'Neon Purple',
+        name: 'Neon Blue',
         filename: 'bg2.png',
+        // 1480x796 - square box layout (aimguard style)
+        // Left col boxes: top(~65,85), mid(~65,315), bottom(~65,540)
+        // Right top row: (~990,85) and (~1230,85)
+        // Right mid row: (~990,315) and (~1230,315)
+        // Right weapon box: (~920,545) big rectangle
         positions: {
-            "211_1": [190, 250],
-            "211_2": [190, 750],
-            "214": [190, 1250],
-            "203": [2250, 240],
-            "204": [2780, 240],
-            "205": [2780, 760],
-            "avatar": [400, 200],
-            "weapon": [2250, 1180],
-            "pet": [2250, 760]
+            "211_1": [65,  85],   // left-top box - hair
+            "214":   [65, 315],   // left-mid box - top wear
+            "203":   [65, 540],   // left-bottom box - face
+            "211_2": [990, 85],   // right-top-left box - mask
+            "204":   [1230, 85],  // right-top-right box - bottom
+            "pet":   [990, 315],  // right-mid-left box - pet
+            "205":   [1230, 315], // right-mid-right box - shoes
+            "weapon":[920, 545],  // big weapon rectangle bottom-right
+            "avatar":[290,  20]   // character center
         },
         sizes: {
-            "203": [280, 280],
-            "204": [280, 280],
-            "205": [280, 280],
-            "214": [280, 280],
-            "211_1": [240, 240],
-            "211_2": [240, 240],
-            "avatar": [1100, 1400],
-            "weapon": [640, 440],
-            "pet": [240, 240]
+            "211_1": [175, 200],
+            "214":   [175, 200],
+            "203":   [175, 200],
+            "211_2": [175, 175],
+            "204":   [175, 175],
+            "pet":   [175, 175],
+            "205":   [175, 175],
+            "weapon":[380, 170],
+            "avatar":[550, 900]
         }
     },
     3: {
         name: 'Neon Red',
         filename: 'bg3.png',
+        // 1024x1024 - hexagon layout (orange) - exact same slots as bg1
         positions: {
-            "203": [55, 355],
-            "204": [55, 600],
-            "205": [180, 770],
-            "214": [855, 380],
-            "211_1": [730, 190],
-            "211_2": [145, 150],
-            "avatar": [310, 200],
-            "weapon": [680, 600],
-            "pet": [725, 777]
+            "211_1": [75,  60],
+            "214":   [45, 330],
+            "204":   [45, 545],
+            "205":   [90, 755],
+            "211_2": [715, 110],
+            "203":   [755, 360],
+            "avatar":[195,  10],
+            "weapon":[615, 575],
+            "pet":   [695, 755]
         },
         sizes: {
-            "203": [130, 130],
-            "204": [130, 130],
-            "205": [130, 130],
-            "214": [130, 130],
-            "211_1": [170, 130],
-            "211_2": [170, 130],
-            "avatar": [388, 660],
-            "weapon": [300, 120],
-            "pet": [100, 100]
+            "211_1": [195, 195],
+            "214":   [175, 175],
+            "204":   [175, 175],
+            "205":   [175, 175],
+            "211_2": [175, 175],
+            "203":   [175, 175],
+            "avatar":[590, 980],
+            "weapon":[260, 150],
+            "pet":   [175, 175]
         }
     }
 };
