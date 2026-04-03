@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const API_ENDPOINTS = [
-    'https://info.bhimsainik.qzz.io/info',
+    'https://info.khushi.qzz.io/info',
 ];
 
 const axiosInstance = axios.create({
