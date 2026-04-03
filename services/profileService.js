@@ -1,100 +1,161 @@
 const { API_ENDPOINTS } = require('../config/api');
 const { ultraFastFetch } = require('../utils/fetcher');
+const { getBackgroundConfig } = require('../config/backgrounds');
 
-const CHARACTER_BASES = [
-    'https://raw.githubusercontent.com/bhimsainik123/free-fire-chracter/main',
-    'https://raw.githubusercontent.com/sukhdaku/free-fire-chracter/main',
-];
-
+// New bases as requested
 const ICONS_BASE = 'https://raw.githubusercontent.com/I-SHOW-AKIRU200/AKIRU-ICONS/main/ICONS';
-
-const ITEMS_FOLDERS = [
-    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items',
-    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items1',
-    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items2',
-    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items3',
-    'https://raw.githubusercontent.com/bhimsainik123/Auto-update-Items/main/items4',
-];
+// UPDATED CHARACTER BASE
+const CHARACTER_BASE = 'https://raw.githubusercontent.com/sukhdaku/free-fire-chracter/main';
+const DEFAULT_EXT = 'png';
 
 class ProfileService {
+    static getAvatarId(profileData) {
+        if (profileData?.profileInfo?.avatarId) {
+            return profileData.profileInfo.avatarId;
+        }
 
-    // AKIRU first, then all Auto-update-Items folders
-    static _iconUrls(id) {
-        if (!id) return [];
-        const clean = String(id).replace(/\.(png|jpg|jpeg|webp)$/i, '');
-        return [
-            `${ICONS_BASE}/${clean}.png`,
-            ...ITEMS_FOLDERS.map(base => `${base}/${clean}.png`),
-        ];
-    }
+        const skills = profileData?.profileInfo?.EquippedSkills;
+        if (!skills?.length) return 406;
 
-    // bhimsainik123 first, then sukhdaku fallback
-    static _characterUrls(avatarId) {
-        if (!avatarId) return [];
-        const clean = String(avatarId).replace(/\.(png|jpg|jpeg|webp)$/i, '');
-        return CHARACTER_BASES.map(base => `${base}/${clean}.png`);
+        for (const skill of skills) {
+            if (String(skill).endsWith('06')) return skill;
+        }
+        return 406;
     }
 
     static async fetchProfileData(uid) {
-        const url = `${API_ENDPOINTS[0]}?uid=${uid}`;
-        const response = await ultraFastFetch(url);
-        if (!response?.data) throw new Error('Profile fetch failed');
+        const profileUrl = `${API_ENDPOINTS[0]}?uid=${uid}`;
+        const response = await ultraFastFetch(profileUrl);
+
+        if (!response?.data) {
+            throw new Error('Profile fetch failed');
+        }
+
         return response.data;
     }
 
-    static getAvatarId(profileData) {
-        return profileData?.profileInfo?.avatarId || 101000011;
+    static _makeIconUrl(id) {
+        if (!id && id !== 0) return null;
+
+        // already full URL
+        if (typeof id === 'string' && (id.startsWith('http://') || id.startsWith('https://'))) return id;
+
+        const clean = String(id).replace(/\.(png|jpg|jpeg|webp)$/i, '');
+        return `${ICONS_BASE}/${clean}.${DEFAULT_EXT}`;
+    }
+
+    static _makeCharacterUrl(id) {
+        if (!id && id !== 0) return null;
+
+        // already full URL
+        if (typeof id === 'string' && (id.startsWith('http://') || id.startsWith('https://'))) return id;
+
+        const clean = String(id).replace(/\.(png|jpg|jpeg|webp)$/i, '');
+        // CHARACTER URL NOW FROM YOUR REPO
+        return `${CHARACTER_BASE}/${clean}.${DEFAULT_EXT}`;
     }
 
     static buildImageRequests(profileData, bgConfig) {
-        const pos   = bgConfig.positions;
-        const sizes = bgConfig.sizes;
-
-        const clothes  = profileData.profileInfo?.clothes
-                      || profileData.profileInfo?.equippedItems || [];
-        const weapons  = profileData.basicInfo?.weaponSkinShows || [];
-        const petId    = profileData.petInfo?.id;
+        const clothes = profileData.profileInfo?.equippedItems || [];
+        const weapons = profileData.playerData?.weaponSkinShows || [];
+        const petId = profileData.petInfo?.id;
         const avatarId = this.getAvatarId(profileData);
 
         const imageRequests = [];
-        const overlayData   = [];
+        const overlayData = [];
 
-        // ── CLOTHES ───────────────────────────────────────────────────
+        // Process clothes
         let cnt211 = 1;
-        for (const id of clothes) {
-            if (!id) continue;
+        clothes.forEach(id => {
+            if (!id) return;
+
             const idStr = String(id);
-            const key   = idStr.startsWith('211') ? `211_${cnt211++}` : idStr.substring(0, 3);
-            if (pos[key] && sizes[key]) {
-                imageRequests.push({ urls: this._iconUrls(id), width: sizes[key][0], height: sizes[key][1] });
-                overlayData.push(pos[key]);
+            const key = idStr.startsWith("211") ? `211_${cnt211++}` : idStr.substring(0, 3);
+            const pos = bgConfig.positions[key];
+            const size = bgConfig.sizes[key];
+
+            if (pos && size) {
+                const url = ProfileService._makeIconUrl(id);
+                if (!url) return;
+
+                imageRequests.push({
+                    url,
+                    width: size[0],
+                    height: size[1]
+                });
+                overlayData.push(pos);
+            }
+        });
+
+        // Add weapon
+        if (weapons[0]) {
+            const size = bgConfig.sizes?.weapon;
+            const pos = bgConfig.positions?.weapon;
+            const url = ProfileService._makeIconUrl(weapons[0]);
+
+            if (url && size && pos) {
+                imageRequests.push({
+                    url,
+                    width: size[0],
+                    height: size[1]
+                });
+                overlayData.push(pos);
             }
         }
 
-        // ── WEAPON ────────────────────────────────────────────────────
-        if (weapons[0] && pos.weapon && sizes.weapon) {
-            imageRequests.push({ urls: this._iconUrls(weapons[0]), width: sizes.weapon[0], height: sizes.weapon[1] });
-            overlayData.push(pos.weapon);
+        // Add pet
+        if (petId) {
+            const size = bgConfig.sizes?.pet;
+            const pos = bgConfig.positions?.pet;
+            const url = ProfileService._makeIconUrl(petId);
+
+            if (url && size && pos) {
+                imageRequests.push({
+                    url,
+                    width: size[0],
+                    height: size[1]
+                });
+                overlayData.push(pos);
+            }
         }
 
-        // ── PET ───────────────────────────────────────────────────────
-        if (petId && pos.pet && sizes.pet) {
-            imageRequests.push({ urls: this._iconUrls(petId), width: sizes.pet[0], height: sizes.pet[1] });
-            overlayData.push(pos.pet);
+        // Add avatar (character from your repo)
+        {
+            const size = bgConfig.sizes?.avatar;
+            const pos = bgConfig.positions?.avatar;
+            const url = ProfileService._makeCharacterUrl(avatarId);
+
+            if (url && size && pos) {
+                imageRequests.push({
+                    url,
+                    width: size[0],
+                    height: size[1]
+                });
+                overlayData.push(pos);
+            } else {
+                // fallback: still push character url even if size/pos missing
+                const fallbackUrl = ProfileService._makeCharacterUrl(avatarId);
+                if (fallbackUrl) {
+                    imageRequests.push({
+                        url: fallbackUrl,
+                        width: size ? size[0] : undefined,
+                        height: size ? size[1] : undefined
+                    });
+                    overlayData.push(pos || [0, 0]);
+                }
+            }
         }
 
-        // ── CHARACTER (last - on top) ─────────────────────────────────
-        if (avatarId && pos.avatar && sizes.avatar) {
-            imageRequests.push({ urls: this._characterUrls(avatarId), width: sizes.avatar[0], height: sizes.avatar[1] });
-            overlayData.push(pos.avatar);
-        }
-
-        console.log(`🎯 avatar: ${avatarId}`);
-        console.log(`👕 clothes: ${clothes.join(', ')}`);
-        console.log(`🔫 weapon: ${weapons[0]}`);
-        console.log(`🐾 pet: ${petId}`);
-
-        return { imageRequests, overlayData, metadata: { avatarId, clothes, weapons, petId } };
+        return {
+            imageRequests,
+            overlayData,
+            metadata: {
+                avatarId,
+                clothes,
+                weapons,
+                petId
+            }
+        };
     }
 }
 
