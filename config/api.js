@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const API_ENDPOINTS = [
-    'https://info.khushi.qzz.io/info',
+    'https://bhim-info.vercel.app/info',
 ];
 
 const axiosInstance = axios.create({
